@@ -437,6 +437,10 @@
                     </span>
                 </button>
             </form>
+            <div class="text-center mt-3">
+                Belum punya akun? 
+                <a href="{{ route('register') }}">Daftar di sini</a>
+            </div>
 
         </div>
     </div>

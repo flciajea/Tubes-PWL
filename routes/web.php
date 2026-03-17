@@ -22,7 +22,7 @@ Route::post('/logout',[LoginController::class,'logout']);
 Route::middleware(['auth','role:1'])->group(function () {
 
     Route::get('/admin/dashboard', function () {
-        return view('admmin.dashoard');
+        return view('admin.dashboard');
     })->name('admin.dashboard');
 
 });
@@ -42,3 +42,7 @@ Route::middleware(['auth','role:3'])->group(function () {
     })->name('user.dashboard');
 
 });
+
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
