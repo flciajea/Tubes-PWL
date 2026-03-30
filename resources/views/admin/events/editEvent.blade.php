@@ -32,17 +32,18 @@
                             </div>
 
                             <!-- CATEGORY -->
+                            <!-- Menambahkan dropdown kategori dengan data dinamis dari database -->
                             <div class="mb-3">
-                                <label class="form-label">Category</label>
-                                <select name="category_id" class="form-control">
-                                    <option value="">-- Pilih Kategori --</option>
-
+                                <label for="category_id" class="form-label">Category</label>
+                                <select name="category_id" id="category_id" class="form-control" required>
+                                    <option value="">-- Pilih Category --</option>
+                                    
                                     @foreach($categories as $cat)
-                                        <option value="{{ $cat->id }}"
-                                            {{ $event->category_id == $cat->id ? 'selected' : '' }}>
+                                        <option value="{{ $cat->id }}" {{ $event->category_id == $cat->id ? 'selected' : '' }}>
                                             {{ $cat->name }}
                                         </option>
                                     @endforeach
+                                    
                                 </select>
                             </div>
 

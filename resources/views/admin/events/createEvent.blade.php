@@ -31,13 +31,16 @@
                             </div>
 
                             <!-- CATEGORY -->
+                            <!-- Menambahkan dropdown kategori dengan data dinamis dari database -->
                             <div class="mb-3">
-                                <label class="form-label">Category</label>
-                                <select name="category_id" class="form-control">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="1">Music</option>
-                                    <option value="2">Sports</option>
-                                    <option value="3">Conference</option>
+                                <label for="category_id" class="form-label">Category</label>
+                                <select name="category_id" id="category_id" class="form-control" required>
+                                    <option value="">-- Pilih Category --</option>
+                                    
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                    
                                 </select>
                             </div>
 

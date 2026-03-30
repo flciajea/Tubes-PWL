@@ -22,7 +22,11 @@ class EventController extends Controller
     // 📌 FORM CREATE
     public function create()
     {
-        return view('admin.events.createEvent'); // ✅ sesuai punyamu
+        // 1. Ambil semua data kategori dari database
+        $categories = Category::all();
+
+        // 2. Kirim variabel $categories ke file blade menggunakan compact()
+        return view('admin.events.createEvent', compact('categories'));
     }
 
     // 📌 STORE
@@ -63,7 +67,7 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::findOrFail($id);
-        $categories = Category::all();
+        $categories = Category::all(); // Ambil semua kategori dari database (untuk memunculkan list di dropdown)
         return view('admin.events.editEvent', compact('event','categories'));
     }
 
@@ -79,7 +83,8 @@ class EventController extends Controller
             'location' => 'required',
             'total_quota' => 'required|integer',
             'status' => 'required',
-            'banner' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'banner' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'category_id' => 'required'
         ]);
 
         // 📌 HANDLE BANNER UPDATE
@@ -101,7 +106,8 @@ class EventController extends Controller
             'event_date' => $request->event_date,
             'location' => $request->location,
             'total_quota' => $request->total_quota,
-            'status' => $request->status
+            'status' => $request->status,
+            'category_id' => $request->category_id
         ]);
 
         return redirect()->route('events.index')
