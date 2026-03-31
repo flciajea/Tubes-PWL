@@ -235,7 +235,6 @@
                                     <a href="#" class="btn btn-primary btn-sm flex-fill">
                                         <i class="fas fa-eye"></i> View
                                     </a>
-                                    <a href="{{ route('events.update', $event->id) }}" class="btn btn-warning btn-sm flex-fill">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>
                                     <button class="btn btn-danger btn-sm" onclick="deleteEvent({{ $event->id }})">

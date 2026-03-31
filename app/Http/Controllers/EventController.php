@@ -68,7 +68,7 @@ class EventController extends Controller
     {
         $event = Event::findOrFail($id);
         $categories = Category::all(); // Ambil semua kategori dari database (untuk memunculkan list di dropdown)
-        return view('admin.events.editEvent', compact('event','categories'));
+        return view('admin.events.editEvent', compact('event', 'categories'));
     }
 
     // 📌 UPDATE
@@ -126,6 +126,9 @@ class EventController extends Controller
 
         $event->delete();
 
-        return back()->with('success', 'Event berhasil dihapus');
+        return response()->json([
+            'success' => true,
+            'message' => 'Event berhasil dihapus'
+        ]);
     }
 }
