@@ -1,3 +1,7 @@
+@extends('layouts.master')
+
+@section('content')
+
 <h1>Dashboard Organizer</h1>
 
 <p>Selamat datang, {{ Auth::user()->name }}</p>
@@ -6,3 +10,5 @@
 @csrf
 <button type="submit">Logout</button>
 </form>
+
+@endsection

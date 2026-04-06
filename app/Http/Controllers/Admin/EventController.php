@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\TicketType;
 
 class EventController extends Controller
 {
@@ -29,7 +30,6 @@ class EventController extends Controller
         return view('admin.events.createEvent', compact('categories'));
     }
 
-    // 📌 STORE
     public function store(Request $request)
     {
         $request->validate([
@@ -38,8 +38,27 @@ class EventController extends Controller
             'event_date' => 'required|date',
             'location' => 'required',
             'total_quota' => 'required|integer',
-            'banner' => 'required|image|mimes:jpg,jpeg,png|max:2048'
+            'banner' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+
+            // 🔥 VALIDASI TICKET
+            'ticket_name.*' => 'required',
+            'ticket_price.*' => 'required|numeric',
+            'ticket_quota.*' => 'required|integer',
         ]);
+
+        // 🔥 HITUNG TOTAL QUOTA TICKET
+        $totalTicketQuota = 0;
+
+        for ($i = 0; $i < count($request->ticket_quota); $i++) {
+            $totalTicketQuota += $request->ticket_quota[$i];
+        }
+
+        // ❗ VALIDASI HARUS SAMA
+        if ($totalTicketQuota != $request->total_quota) {
+            return back()->withErrors([
+                'quota' => 'Total quota ticket harus sama dengan quota event!'
+            ])->withInput();
+        }
 
         // upload banner
         $banner = null;
@@ -47,7 +66,8 @@ class EventController extends Controller
             $banner = $request->file('banner')->store('event_banner', 'public');
         }
 
-        Event::create([
+        // 🔥 SIMPAN EVENT (UBAH DIKIT BIAR ADA VARIABEL)
+        $event = Event::create([
             'organizer_id' => Auth::id(),
             'category_id' => $request->category_id,
             'title' => $request->title,
@@ -59,8 +79,20 @@ class EventController extends Controller
             'status' => 'draft'
         ]);
 
+        // 🔥 SIMPAN TICKET TYPES
+        for ($i = 0; $i < count($request->ticket_name); $i++) {
+
+            TicketType::create([
+                'event_id' => $event->id,
+                'name' => $request->ticket_name[$i],
+                'price' => $request->ticket_price[$i],
+                'quota' => $request->ticket_quota[$i],
+                'remaining_quota' => $request->ticket_quota[$i]
+            ]);
+        }
+
         return redirect()->route('events.index')
-            ->with('success', 'Event berhasil dibuat');
+            ->with('success', 'Event + Ticket berhasil dibuat');
     }
 
     // 📌 FORM EDIT
@@ -84,8 +116,29 @@ class EventController extends Controller
             'total_quota' => 'required|integer',
             'status' => 'required',
             'banner' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'category_id' => 'required'
+            'category_id' => 'required',
+
+            // 🔥 VALIDASI TICKET
+            'ticket_name.*' => 'required',
+            'ticket_price.*' => 'required|numeric',
+            'ticket_quota.*' => 'required|integer',
+
+
         ]);
+        // 🔥 HITUNG TOTAL QUOTA TICKET
+        $totalTicketQuota = 0;
+
+        for ($i = 0; $i < count($request->ticket_quota); $i++) {
+            $totalTicketQuota += $request->ticket_quota[$i];
+        }
+
+        // ❗ VALIDASI HARUS SAMA
+        if ($totalTicketQuota != $request->total_quota) {
+            return back()->withErrors([
+                'quota' => 'Total quota ticket harus sama dengan quota event!'
+            ])->withInput();
+        }
+
 
         // 📌 HANDLE BANNER UPDATE
         if ($request->hasFile('banner')) {
@@ -108,7 +161,11 @@ class EventController extends Controller
             'total_quota' => $request->total_quota,
             'status' => $request->status,
             'category_id' => $request->category_id
+
+
         ]);
+
+
 
         return redirect()->route('events.index')
             ->with('success', 'Event berhasil diupdate');

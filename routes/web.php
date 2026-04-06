@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\TicketTypeController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -27,6 +28,10 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+
+    Route::get('/admin/events/{id}/tickets', function ($id) {
+        return \App\Models\TicketType::where('event_id', $id)->get();
+    });
 
     // 📌 INDEX (list event)
     Route::get('/admin/events', [EventController::class, 'index'])
@@ -78,6 +83,18 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
         ->name('admin.dashboard');
 
+    // 🔥 TICKET TYPE (ADMIN)
+    Route::prefix('admin/events/{event_id}/ticket')->group(function () {
+
+        Route::get('/', [TicketTypeController::class, 'index'])->name('ticket.index');
+        Route::get('/create', [TicketTypeController::class, 'create'])->name('ticket.create');
+        Route::post('/store', [TicketTypeController::class, 'store'])->name('ticket.store');
+
+    });
+
+    Route::get('/admin/ticket/{id}/edit', [TicketTypeController::class, 'edit'])->name('ticket.edit');
+    Route::post('/admin/ticket/{id}/update', [TicketTypeController::class, 'update'])->name('ticket.update');
+    Route::get('/admin/ticket/{id}/delete', [TicketTypeController::class, 'destroy'])->name('ticket.delete');
 });
 
 Route::middleware(['auth', 'role:2'])->group(function () {
