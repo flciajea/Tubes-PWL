@@ -16,134 +16,6 @@
             </div>
         </div>
 
-        <!-- Filter & Search Section -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="searchEvent"
-                                        placeholder="Search events..."
-                                    />
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-select" id="filterCategory">
-                                    <option value="">All Categories</option>
-                                    <option value="music">Music</option>
-                                    <option value="sports">Sports</option>
-                                    <option value="conference">Conference</option>
-                                    <option value="workshop">Workshop</option>
-                                    <option value="seminar">Seminar</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-select" id="filterStatus">
-                                    <option value="">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="draft">Draft</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-                                    <i class="fas fa-redo"></i> Reset
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-sm-6 col-lg-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-primary bubble-shadow-small">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Total Events</p>
-                                    <h4 class="card-title">{{ $events->count() }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-success bubble-shadow-small">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Active Events</p>
-                                    <h4 class="card-title">{{ $events->where('status', 'active')->count() }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-warning bubble-shadow-small">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Draft Events</p>
-                                    <h4 class="card-title">{{ $events->where('status', 'draft')->count() }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-info bubble-shadow-small">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Total Quota</p>
-                                    <h4 class="card-title">{{ $events->sum('total_quotas') }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- View Toggle -->
         <div class="row mb-3">
             <div class="col-md-12">
@@ -227,7 +99,7 @@
                                 
                                 <div class="mb-3">
                                     <i class="fas fa-users text-success"></i>
-                                    <small class="ms-2">Quota: {{ $event->total_quotas }} participants</small>
+                                    <small class="ms-2">Quota: {{ $event->total_quota }} participants</small>
                                 </div>
 
                                 <!-- Action Buttons -->

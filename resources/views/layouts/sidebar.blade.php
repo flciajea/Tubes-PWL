@@ -2,7 +2,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="#" class="logo">
-                <img src="{{ asset('assets/img/kaiadmin/logo_light.svg') }}" class="navbar-brand" height="20">
+                <img src="{{ asset('assets/img/kaiadmin/LogoFIx.png') }}" class="navbar-brand" height="85">
             </a>
         </div>
     </div>
@@ -27,26 +27,8 @@
                     </li>
 
                     <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#ticket">
-                            <i class="fas fa-ticket-alt"></i>
-                            <p>Ticketing</p>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="#"><i class="fas fa-credit-card"></i>
-                            <p>Transaksi</p>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="#"><i class="fas fa-chart-bar"></i>
-                            <p>Report</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="{{ route('admin.users.index') }}"><i class="fas fa-users"></i>
-                            <p>User</p>
+                            <p>Manajemen User</p>
                         </a>
                     </li>
                 @endif

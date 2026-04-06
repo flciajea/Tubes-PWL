@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\EventController;
-
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', function () {
@@ -74,6 +74,9 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     // 📌 DELETE
     Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
         ->name('admin.users.destroy');
+
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
 
 });
 
