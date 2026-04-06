@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\EventController;
 
+use App\Http\Controllers\Admin\UserController;
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -47,6 +49,31 @@ Route::middleware(['auth', 'role:1'])->group(function () {
 
     Route::delete('/admin/events/{id}', [EventController::class, 'destroy'])
         ->name('events.destroy');
+
+
+    // 📌 INDEX (list user)
+    Route::get('/admin/users', [UserController::class, 'index'])
+        ->name('admin.users.index');
+
+    // 📌 CREATE FORM
+    Route::get('/admin/users/create', [UserController::class, 'create'])
+        ->name('admin.users.create');
+
+    // 📌 STORE
+    Route::post('/admin/users', [UserController::class, 'store'])
+        ->name('admin.users.store');
+
+    // 📌 EDIT
+    Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])
+        ->name('admin.users.edit');
+
+    // 📌 UPDATE
+    Route::put('/admin/users/{id}', [UserController::class, 'update'])
+        ->name('admin.users.update');
+
+    // 📌 DELETE
+    Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
+        ->name('admin.users.destroy');
 
 });
 
