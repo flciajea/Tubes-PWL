@@ -76,7 +76,7 @@ class EventController extends Controller
             'event_date' => $request->event_date,
             'location' => $request->location,
             'total_quota' => $request->total_quota,
-            'status' => 'draft'
+            'status' => 'Draft'
         ]);
 
         // 🔥 SIMPAN TICKET TYPES
@@ -126,18 +126,18 @@ class EventController extends Controller
 
         ]);
         // 🔥 HITUNG TOTAL QUOTA TICKET
-        $totalTicketQuota = 0;
+        // $totalTicketQuota = 0;
 
-        for ($i = 0; $i < count($request->ticket_quota); $i++) {
-            $totalTicketQuota += $request->ticket_quota[$i];
-        }
+        // for ($i = 0; $i < count($request->ticket_quota); $i++) {
+        //     $totalTicketQuota += $request->ticket_quota[$i];
+        // }
 
         // ❗ VALIDASI HARUS SAMA
-        if ($totalTicketQuota != $request->total_quota) {
-            return back()->withErrors([
-                'quota' => 'Total quota ticket harus sama dengan quota event!'
-            ])->withInput();
-        }
+        // if ($totalTicketQuota != $request->total_quota) {
+        //     return back()->withErrors([
+        //         'quota' => 'Total quota ticket harus sama dengan quota event!'
+        //     ])->withInput();
+        // }
 
 
         // 📌 HANDLE BANNER UPDATE

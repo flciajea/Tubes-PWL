@@ -62,23 +62,30 @@
                 {{-- ================= USER ================= --}}
                 @if (auth()->user()->role_id == 3)
                     <li class="nav-item">
-                        <a href="#">
+                        <a href="{{ route('user.dashboard') }}">
                             <i class="fas fa-home"></i>
                             <p>Dashboard</p>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a href="#">
+                        <a href="{{ route('user.events.index') }}">
                             <i class="fas fa-calendar"></i>
                             <p>Event</p>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a href="#">
+                        <a href="{{ route('user.events.history') }}">
                             <i class="fas fa-ticket-alt"></i>
                             <p>Tiket Saya</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('user.payment.history') }}">
+                            <i class="fas fa-receipt"></i>
+                            <p>Riwayat Pembayaran</p>
                         </a>
                     </li>
                 @endif

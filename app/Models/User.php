@@ -51,4 +51,16 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+    // Relasi ke Orders
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    // Relasi ke Payments (via Orders)
+    public function payments()
+    {
+        return $this->hasManyThrough(Payment::class, Order::class);
+    }
 }

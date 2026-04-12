@@ -108,11 +108,12 @@
                             <!-- STATUS -->
                             <div class="mb-3">
                                 <label>Status</label>
-                                <select name="status" class="form-control">
-                                    <option value="draft" {{ $event->status == 'draft' ? 'selected' : '' }}>Draft</option>
-                                    <option value="published" {{ $event->status == 'published' ? 'selected' : '' }}>Published</option>
-                                    <option value="completed" {{ $event->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="cancelled" {{ $event->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <select name="status" class="form-control" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="Draft" {{ $event->status == 'Draft' ? 'selected' : '' }}>Draft</option>
+                                    <option value="Published" {{ $event->status == 'Published' ? 'selected' : '' }}>Published</option>
+                                    <option value="Completed" {{ $event->status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                    <option value="Cancelled" {{ $event->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                                 </select>
                             </div>
 

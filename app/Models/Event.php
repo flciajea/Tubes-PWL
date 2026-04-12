@@ -20,6 +20,12 @@ class Event extends Model
         'status'
     ];
 
+    protected $casts = [
+        'event_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     // Relasi ke Organizer (User)
     public function organizer()
     {
@@ -35,5 +41,11 @@ class Event extends Model
     public function ticketTypes()
     {
         return $this->hasMany(TicketType::class);
+    }
+
+    // Relasi ke Orders
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }
