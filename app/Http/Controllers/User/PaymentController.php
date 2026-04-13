@@ -67,6 +67,7 @@ class PaymentController extends Controller
                 'order_id' => $order->id,
                 'payment_channel' => $validated['payment_channel'],
                 'payment_status' => 'pending',
+                'amount' => $order->total_amount,
             ]);
         } else {
             // UPDATE PAYMENT YANG ADA
@@ -81,7 +82,7 @@ class PaymentController extends Controller
             $file = $request->file('payment_proof');
             $filename = 'payments/' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
             $file->storeAs('public', $filename);
-            
+
             // Store in order's payment_reference (or create table baru untuk proof jika perlu)
         }
 
@@ -152,14 +153,40 @@ class PaymentController extends Controller
     {
         $user = $request->user();
 
-        $payments = Payment::whereHas('order', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
-        ->with('order.event', 'order.orderItems')
-        ->latest()
-        ->paginate(10);
+        // Query dasar untuk Payment
+        $query = Payment::whereHas('order', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
 
-        return view('user.payment.history', compact('payments'));
+        // Ambil total dengan join ke tabel orders karena kolom nominal ada di sana
+        $totalAmount = $query->clone()->join('orders', 'payments.order_id', '=', 'orders.id')->sum('orders.total_amount');
+
+        $successAmount = $query->clone()
+            ->where('payment_status', 'success')
+            ->join('orders', 'payments.order_id', '=', 'orders.id')
+            ->sum('orders.total_amount');
+
+        $pendingAmount = $query->clone()
+            ->where('payment_status', 'pending')
+            ->join('orders', 'payments.order_id', '=', 'orders.id')
+            ->sum('orders.total_amount');
+
+        $failedAmount = $query->clone()
+            ->where('payment_status', 'failed')
+            ->join('orders', 'payments.order_id', '=', 'orders.id')
+            ->sum('orders.total_amount');
+
+        $payments = $query->with('order.event', 'order.orderItems.ticketType')
+            ->latest()
+            ->paginate(10);
+
+        return view('user.payment.history', compact(
+            'payments',
+            'totalAmount',
+            'successAmount',
+            'pendingAmount',
+            'failedAmount'
+        ));
     }
 
     /**
@@ -181,7 +208,7 @@ class PaymentController extends Controller
         }
 
         // Generate ticket info dari order items
-        $itemInfo = $order->orderItems->map(function($item) {
+        $itemInfo = $order->orderItems->map(function ($item) {
             return "{$item->ticketType->name} x{$item->quantity}";
         })->join(', ');
 

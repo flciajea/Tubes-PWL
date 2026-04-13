@@ -2,9 +2,9 @@
 
 @section('content')
 
-<h1>Dashboard Organizer</h1>
-
-<p>Selamat datang, {{ Auth::user()->name }}</p>
+<a href="{{ route('organizer.scan') }}" class="btn btn-primary">
+    🎫 Scan QR Tiket
+</a>
 
 <form method="POST" action="/logout">
 @csrf

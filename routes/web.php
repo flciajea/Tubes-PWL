@@ -11,6 +11,7 @@ use App\Http\Controllers\TicketTypeController;
 use App\Http\Controllers\User\EventController as UserEventController;
 use App\Http\Controllers\User\PaymentController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\TicketController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -191,3 +192,9 @@ Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
+Route::prefix('admin')->group(function () {
+
+    Route::get('/organizer/scan', [TicketController::class, 'scan'])->name('organizer.scan');
+    Route::post('/validate-qr', [TicketController::class, 'validateQr']);
+    Route::get('/checkin/{kode}', [TicketController::class, 'manual']);
+});
