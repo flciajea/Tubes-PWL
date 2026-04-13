@@ -12,6 +12,7 @@ use App\Http\Controllers\User\EventController as UserEventController;
 use App\Http\Controllers\User\PaymentController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\Organizer\DashboardController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -198,3 +199,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/validate-qr', [TicketController::class, 'validateQr']);
     Route::get('/checkin/{kode}', [TicketController::class, 'manual']);
 });
+
+Route::get('/organizer/dashboard', [DashboardController::class, 'index'])
+    ->name('organizer.dashboard');
