@@ -30,27 +30,26 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:categories,name',
-        ], [
-            'name.required' => 'Nama kategori harus diisi',
-            'name.unique' => 'Kategori dengan nama ini sudah ada',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|unique:categories|max:255',
+            ]);
 
-        $category = Category::create($validated);
+            $category = Category::create($validated);
 
-        // Jika AJAX request, return JSON
-        if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Kategori berhasil ditambahkan!',
-                'category_id' => $category->id,
-                'category_name' => $category->name
+                'message' => 'Kategori berhasil ditambahkan',
+                'category_id' => $category->id,   // Pastikan nama key ini sama dengan JS
+                'category_name' => $category->name // Pastikan nama key ini sama dengan JS
             ]);
-        }
 
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Kategori berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nama kategori sudah ada atau terjadi kesalahan.'
+            ], 422); // Gunakan code 422 untuk error validasi
+        }
     }
 
     /**

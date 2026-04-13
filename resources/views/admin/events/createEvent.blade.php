@@ -48,12 +48,13 @@
                                         <select name="category_id" id="category_id" class="form-control" required>
                                             <option value="">-- Pilih Category --</option>
 
-                                            @foreach($categories as $cat)
+                                            @foreach ($categories as $cat)
                                                 <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                             @endforeach
 
                                         </select>
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#addCategoryModal">
                                             <i class="fas fa-plus"></i> Tambah
                                         </button>
                                     </div>
@@ -62,8 +63,7 @@
                                 <!-- DESCRIPTION -->
                                 <div class="mb-3">
                                     <label class="form-label">Description</label>
-                                    <textarea name="description" rows="4"
-                                        class="form-control">{{ old('description') }}</textarea>
+                                    <textarea name="description" rows="4" class="form-control">{{ old('description') }}</textarea>
                                 </div>
                                 <hr>
 
@@ -110,7 +110,8 @@
                         <div class="card shadow-sm">
                             <div class="card-body text-center">
 
-                                <img id="preview" src="https://via.placeholder.com/300x200" class="img-fluid rounded mb-3">
+                                <img id="preview" src="https://via.placeholder.com/300x200"
+                                    class="img-fluid rounded mb-3">
 
                                 <input type="file" name="banner" id="banner" class="form-control">
 
@@ -175,12 +176,8 @@
                         <label class="form-label" for="new_category_name">
                             <strong>Nama Kategori <span class="text-danger">*</span></strong>
                         </label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="new_category_name" 
-                               name="name" 
-                               placeholder="Contoh: Olahraga, Musik, Seni, dll"
-                               required>
+                        <input type="text" class="form-control" id="new_category_name" name="name"
+                            placeholder="Contoh: Olahraga, Musik, Seni, dll" required>
                         <div id="categoryErrorMsg" class="invalid-feedback" style="display: none;"></div>
                     </div>
                 </form>
@@ -195,13 +192,13 @@
 
 @section('ExtraJS')
     <script>
-        document.getElementById('banner').onchange = function () {
+        document.getElementById('banner').onchange = function() {
             const file = this.files[0];
             if (file) {
                 document.getElementById('preview').src = URL.createObjectURL(file);
             }
         }
-        
+
         function tambahTiket() {
             let html = `
             <div class="row mb-2">
@@ -236,77 +233,79 @@
         document.getElementById('saveCategoryBtn').addEventListener('click', function() {
             const categoryName = document.getElementById('new_category_name').value.trim();
             const errorMsg = document.getElementById('categoryErrorMsg');
-            
+
             if (!categoryName) {
                 errorMsg.textContent = 'Nama kategori harus diisi';
                 errorMsg.style.display = 'block';
                 return;
             }
-            
+
             // Disable button saat proses
             this.disabled = true;
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
-            
+
             // AJAX Request
-            fetch('{{ route("admin.categories.store") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                },
-                body: JSON.stringify({
-                    name: categoryName
+            fetch('{{ route('admin.categories.store') }}', {
+                    method: 'POST',
+                    // Cari bagian fetch di script kamu, pastikan headers-nya begini:
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json', // Tambahkan ini agar Laravel selalu balas JSON
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Cara paling aman ambil token di Blade
+                    },
+                    body: JSON.stringify({
+                        name: categoryName
+                    })
                 })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw data;
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Clear form
-                    document.getElementById('addCategoryForm').reset();
-                    errorMsg.style.display = 'none';
-                    
-                    // Tambah option baru ke dropdown
-                    const select = document.getElementById('category_id');
-                    const newOption = document.createElement('option');
-                    newOption.value = data.category_id;
-                    newOption.textContent = data.category_name;
-                    newOption.selected = true;
-                    select.appendChild(newOption);
-                    
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
-                    modal.hide();
-                    
-                    // Show success message
-                    showAlert('Kategori berhasil ditambahkan!', 'success');
-                } else {
-                    errorMsg.textContent = data.message || 'Gagal menambahkan kategori';
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw data;
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Clear form
+                        document.getElementById('addCategoryForm').reset();
+                        errorMsg.style.display = 'none';
+
+                        // Tambah option baru ke dropdown
+                        const select = document.getElementById('category_id');
+                        const newOption = document.createElement('option');
+                        newOption.value = data.category_id;
+                        newOption.textContent = data.category_name;
+                        newOption.selected = true;
+                        select.appendChild(newOption);
+
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
+                        modal.hide();
+
+                        // Show success message
+                        showAlert('Kategori berhasil ditambahkan!', 'success');
+                    } else {
+                        errorMsg.textContent = data.message || 'Gagal menambahkan kategori';
+                        errorMsg.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+
+                    if (error.message) {
+                        errorMsg.textContent = error.message;
+                    } else if (error.errors && error.errors.name) {
+                        errorMsg.textContent = error.errors.name[0];
+                    } else {
+                        errorMsg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+                    }
                     errorMsg.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                
-                if (error.message) {
-                    errorMsg.textContent = error.message;
-                } else if (error.errors && error.errors.name) {
-                    errorMsg.textContent = error.errors.name[0];
-                } else {
-                    errorMsg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
-                }
-                errorMsg.style.display = 'block';
-            })
-            .finally(() => {
-                this.disabled = false;
-                this.innerHTML = 'Simpan Kategori';
-            });
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    this.innerHTML = 'Simpan Kategori';
+                });
         });
 
         function showAlert(message, type) {
@@ -316,10 +315,10 @@
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
-            
+
             const pageHeader = document.querySelector('.page-header');
             pageHeader.parentNode.insertBefore(alertDiv, pageHeader.nextSibling);
-            
+
             setTimeout(() => alertDiv.remove(), 5000);
         }
     </script>
