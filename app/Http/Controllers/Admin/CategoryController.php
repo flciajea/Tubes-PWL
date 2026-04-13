@@ -37,7 +37,17 @@ class CategoryController extends Controller
             'name.unique' => 'Kategori dengan nama ini sudah ada',
         ]);
 
-        Category::create($validated);
+        $category = Category::create($validated);
+
+        // Jika AJAX request, return JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kategori berhasil ditambahkan!',
+                'category_id' => $category->id,
+                'category_name' => $category->name
+            ]);
+        }
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Kategori berhasil ditambahkan!');
