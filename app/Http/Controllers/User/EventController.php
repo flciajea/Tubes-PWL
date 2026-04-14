@@ -29,11 +29,11 @@ class EventController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%")
-                  ->orWhereHas('category', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -95,7 +95,7 @@ class EventController extends Controller
     public function storeRegistration(Request $request, $eventId)
     {
         $user = $request->user();
-        
+
         // VALIDASI
         $validated = $request->validate([
             'ticket_type_id' => 'required|exists:ticket_types,id',
@@ -125,7 +125,7 @@ class EventController extends Controller
         // Cek apakah user sudah order untuk ticket type yang sama event ini
         $existingOrder = Order::where('user_id', $user->id)
             ->where('event_id', $eventId)
-            ->whereHas('orderItems', function($q) use ($validated) {
+            ->whereHas('orderItems', function ($q) use ($validated) {
                 $q->where('ticket_type_id', $validated['ticket_type_id']);
             })
             ->where('status', '!=', 'cancelled')
@@ -228,57 +228,72 @@ class EventController extends Controller
         return redirect()->route('user.events.history')
             ->with('success', 'Order berhasil dibatalkan!');
     }
-public function success($orderId)
-{
-    $order = Order::with('orderItems', 'user')->findOrFail($orderId);
+    public function success($orderId)
+    {
+        $order = Order::with('orderItems', 'user')->findOrFail($orderId);
 
-    // update status jadi paid
-    $order->status = 'paid';
-    $order->save();
+        // update status jadi paid
+        $order->status = 'paid';
+        $order->save();
 
-    $tickets = [];
+        $tickets = [];
 
-    // 🔥 GENERATE TICKET + QR FILE
-    foreach ($order->orderItems as $item) {
+        // 🔥 GENERATE TICKET + QR FILE
+        foreach ($order->orderItems as $item) {
 
-        for ($i = 0; $i < $item->quantity; $i++) {
+            for ($i = 0; $i < $item->quantity; $i++) {
 
-            $ticket = Ticket::create([
-                'user_id' => $order->user_id,
-                'order_item_id' => $item->id
-            ]);
+                $ticket = Ticket::create([
+                    'user_id' => $order->user_id,
+                    'order_item_id' => $item->id
+                ]);
 
-            // buat file QR di storage
-            $fileName = 'qrcodes/' . $ticket->ticket_code . '.png';
+                // buat file QR di storage
+                $fileName = 'qrcodes/' . $ticket->ticket_code . '.png';
 
-            QrCode::format('png')
-                ->size(300)
-                ->generate($ticket->qr_code, storage_path('app/public/' . $fileName));
+                QrCode::format('png')
+                    ->size(300)
+                    ->generate($ticket->qr_code, storage_path('app/public/' . $fileName));
 
-            // simpan path ke database (opsional, kalau mau)
-            $ticket->qr_code = $fileName;
-            $ticket->save();
+                // simpan path ke database (opsional, kalau mau)
+                $ticket->qr_code = $fileName;
+                $ticket->save();
 
-            $tickets[] = $ticket;
-        }
-    }
-
-    // 🔥 KIRIM EMAIL KE USER
-    Mail::send('emails.ticket', ['tickets' => $tickets, 'order' => $order], function ($m) use ($order, $tickets) {
-
-        $m->to($order->user->email)
-          ->subject('Tiket Event Anda');
-
-        // attach semua QR
-        foreach ($tickets as $t) {
-            $path = storage_path('app/public/' . $t->qr_code);
-            if (file_exists($path)) {
-                $m->attach($path);
+                $tickets[] = $ticket;
             }
         }
-    });
 
-    return redirect()->route('user.dashboard')
-        ->with('success', 'Pembayaran berhasil, tiket sudah dikirim ke email!');
-}
+        // 🔥 KIRIM EMAIL KE USER
+        Mail::send('emails.ticket', ['tickets' => $tickets, 'order' => $order], function ($m) use ($order, $tickets) {
+
+            $m->to($order->user->email)
+                ->subject('Tiket Event Anda');
+
+            // attach semua QR
+            foreach ($tickets as $t) {
+                $path = storage_path('app/public/' . $t->qr_code);
+                if (file_exists($path)) {
+                    $m->attach($path);
+                }
+            }
+        });
+
+        return redirect()->route('user.dashboard')
+            ->with('success', 'Pembayaran berhasil, tiket sudah dikirim ke email!');
+    }
+
+    public function store(Request $request)
+    {
+        Order::create([
+            'user_id' => auth()->id(),
+            'event_id' => $request->event_id,
+            'total_amount' => $request->total,
+            'status' => 'pending', // WAJIB
+            'payment_method' => $request->payment_method,
+            'payment_reference' => null,
+        ]);
+
+        return redirect()->route('user.orders')
+            ->with('success', 'Pesanan berhasil dibuat, menunggu konfirmasi organizer.');
+    }
 }

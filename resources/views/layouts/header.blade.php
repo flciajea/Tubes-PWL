@@ -26,15 +26,6 @@
   <nav class="navbar navbar-header navbar-expand-lg border-bottom">
     <div class="container-fluid">
 
-      <!-- SEARCH -->
-      <div class="d-none d-lg-flex">
-        <div class="input-group">
-          <button class="btn btn-search">
-            <i class="fa fa-search"></i>
-          </button>
-          <input type="text" class="form-control" placeholder="Search...">
-        </div>
-      </div>
 
       <!-- RIGHT MENU -->
       <ul class="navbar-nav ms-auto align-items-center">

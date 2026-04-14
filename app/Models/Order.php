@@ -31,7 +31,7 @@ class Order extends Model
     // Relasi ke Event
     public function event()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'event_id');
     }
 
     // Relasi ke OrderItems
@@ -39,10 +39,13 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-
     // Relasi ke Payment
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+    public function ticketType()
+    {
+        return $this->belongsTo(TicketType::class);
     }
 }

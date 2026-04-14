@@ -39,6 +39,7 @@
                     <li class="nav-item">
                         <a href="#">
                             <i class="fas fa-home"></i>
+                            <a href="{{ route('organizer.dashboard') }}"><i class="fas fa-users"></i>
                             <p>Dashboard</p>
                         </a>
                     </li>
@@ -46,16 +47,19 @@
                     <li class="nav-item">
                         <a href="#">
                             <i class="fas fa-chart-line"></i>
-                            <p>Penjualan Tiket</p>
+                            <a href="{{ route('organizer.waiting-list') }}"><i class="fas fa-users"></i>
+                            <p>Waiting List</p>
                         </a>
                     </li>
 
-                    <li class="nav-item">
+                     <li class="nav-item">
                         <a href="#">
-                            <i class="fas fa-calendar"></i>
-                            <p>Event Saya</p>
+                            <i class="fas fa-chart-line"></i>
+                            <a href="{{ route('organizer.orders.history') }}"><i class="fas fa-users"></i>
+                            <p>Order History</p>
                         </a>
                     </li>
+
                 @endif
 
 

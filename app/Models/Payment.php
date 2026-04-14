@@ -12,7 +12,9 @@ class Payment extends Model
         'order_id',
         'payment_channel',
         'payment_status',
-        'paid_at',
+        'amount',
+        'payment_proof', // Pastikan ini ada
+        'paid_at'
     ];
 
     protected $casts = [

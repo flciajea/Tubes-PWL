@@ -11,167 +11,152 @@ use Illuminate\Support\Str;
 class PaymentController extends Controller
 {
     /**
-     * Tampilkan halaman checkout/payment
+     * SHOW CHECKOUT PAGE
      */
     public function show(Request $request, $orderId)
     {
-        $user = $request->user();
         $order = Order::with('event', 'orderItems', 'payment')
             ->findOrFail($orderId);
 
-        // Validasi: order milik user yang login
-        if ($order->user_id != $user->id) {
-            return redirect()->back()->with('error', 'Tidak bisa akses order ini!');
+        // auth check
+        if ($order->user_id != $request->user()->id) {
+            return back()->with('error', 'Tidak bisa akses order ini');
         }
 
-        // Jika sudah ada payment dengan status success, redirect ke berhasil
+        // kalau sudah sukses payment → langsung success page
         if ($order->payment && $order->payment->payment_status === 'success') {
-            return redirect()->route('user.payment.success', $order->id)
-                ->with('info', 'Pembayaran sudah selesai!');
+            return redirect()->route('user.payment.success', $order->id);
         }
 
         return view('user.payment.checkout', compact('order'));
     }
 
     /**
-     * Proses pembayaran
+     * PROCESS PAYMENT
      */
     public function process(Request $request, $orderId)
     {
-        $user = $request->user();
         $order = Order::findOrFail($orderId);
 
-        // Validasi: order milik user yang login
-        if ($order->user_id != $user->id) {
-            return redirect()->back()->with('error', 'Tidak bisa akses order ini!');
+        if ($order->user_id != $request->user()->id) {
+            return back()->with('error', 'Tidak bisa akses order ini');
         }
 
-        // VALIDASI INPUT
         $validated = $request->validate([
             'payment_channel' => 'required|in:Bank Transfer,Credit Card,E-Wallet,Cash',
-            'payment_proof' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'payment_proof' => 'nullable|image|max:2048',
         ]);
 
-        // Update order payment_method
+        // update order
         $order->update([
             'payment_method' => $validated['payment_channel'],
             'status' => 'pending',
         ]);
 
-        // Jika sudah ada payment, gunakan yang ada
-        $payment = $order->payment;
-
-        if (!$payment) {
-            // BUAT PAYMENT BARU
-            $payment = Payment::create([
-                'order_id' => $order->id,
+        // create or update payment
+        $payment = Payment::updateOrCreate(
+            ['order_id' => $order->id],
+            [
                 'payment_channel' => $validated['payment_channel'],
                 'payment_status' => 'pending',
                 'amount' => $order->total_amount,
-            ]);
-        } else {
-            // UPDATE PAYMENT YANG ADA
-            $payment->update([
-                'payment_channel' => $validated['payment_channel'],
-                'payment_status' => 'pending',
-            ]);
-        }
+            ]
+        );
 
-        // HANDLE UPLOAD BUKTI PEMBAYARAN
+        // 2. LOGIKA UPLOAD (Perbaiki bagian ini)
         if ($request->hasFile('payment_proof')) {
             $file = $request->file('payment_proof');
-            $filename = 'payments/' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public', $filename);
 
-            // Store in order's payment_reference (or create table baru untuk proof jika perlu)
+            // Buat nama file yang unik
+            $fileNameOnly = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+            /* Simpan ke disk 'public'. 
+               Secara otomatis akan masuk ke folder: storage/app/public/payments/
+            */
+            $file->storeAs('payments', $fileNameOnly, 'public');
+
+            // SIMPAN PATH KE DATABASE (agar bisa dipanggil dengan asset('storage/' . $path))
+            $payment->update([
+                'payment_proof' => 'payments/' . $fileNameOnly
+            ]);
         }
 
-        // SIMULASI VERIFIKASI PEMBAYARAN
-        // Dalam production, connect ke payment gateway (Midtrans, Stripe, dll)
-        return redirect()->route('user.payment.verify', $payment->id)
-            ->with('success', 'Payment berhasil diproses!');
+        return redirect()->route('user.payment.verify', $payment->id);
     }
 
     /**
-     * Verifikasi pembayaran
+     * VERIFY PAYMENT (SIMULASI / WEBHOOK)
      */
     public function verify(Request $request, $paymentId)
     {
-        $user = $request->user();
-        $payment = Payment::with('order')
-            ->findOrFail($paymentId);
+        $payment = Payment::with('order')->findOrFail($paymentId);
 
-        // Validasi: payment milik user yang login
-        if ($payment->order->user_id != $user->id) {
-            return redirect()->back()->with('error', 'Tidak bisa akses pembayaran ini!');
+        if ($payment->order->user_id != $request->user()->id) {
+            return back()->with('error', 'Tidak bisa akses pembayaran ini');
         }
 
-        // SIMULASI: Ubah status payment menjadi success
-        // Dalam production, ini dilakukan melalui webhook dari payment gateway
+        // update payment success
         $payment->update([
             'payment_status' => 'success',
             'paid_at' => now(),
         ]);
 
-        // UPDATE ORDER STATUS
-        $order = $payment->order;
-        $order->update([
-            'status' => 'paid',
+        // ❗ PENTING: TIDAK langsung confirmed
+        // harus tunggu organizer approval
+        $payment->order->update([
+            'status' => 'pending',
         ]);
 
-        return redirect()->route('user.payment.success', $order->id)
-            ->with('success', 'Pembayaran berhasil! Event sudah terdaftar.');
+        return redirect()->route('user.payment.success', $payment->order->id);
     }
 
     /**
-     * Halaman sukses pembayaran
+     * SUCCESS PAGE
      */
     public function success(Request $request, $orderId)
     {
-        $user = $request->user();
         $order = Order::with('event', 'orderItems', 'payment')
             ->findOrFail($orderId);
 
-        // Validasi: order milik user yang login
-        if ($order->user_id != $user->id) {
-            return redirect()->back()->with('error', 'Tidak bisa akses order ini!');
+        if ($order->user_id != $request->user()->id) {
+            return back()->with('error', 'Tidak bisa akses order ini');
         }
 
-        // Check status pembayaran
-        if ($order->status != 'paid' || !$order->payment || $order->payment->payment_status != 'success') {
-            return redirect()->route('user.payment.show', $order->id)
-                ->with('error', 'Pembayaran belum dikonfirmasi!');
+        // validasi payment
+        if (!$order->payment || $order->payment->payment_status !== 'success') {
+            return redirect()->route('user.payment.show', $order->id);
         }
 
         return view('user.payment.success', compact('order'));
     }
 
     /**
-     * List pembayaran user
+     * HISTORY
      */
+
     public function history(Request $request)
     {
         $user = $request->user();
 
-        // Query dasar untuk Payment
         $query = Payment::whereHas('order', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
-        // Ambil total dengan join ke tabel orders karena kolom nominal ada di sana
-        $totalAmount = $query->clone()->join('orders', 'payments.order_id', '=', 'orders.id')->sum('orders.total_amount');
+        $totalAmount = (clone $query)
+            ->join('orders', 'payments.order_id', '=', 'orders.id')
+            ->sum('orders.total_amount');
 
-        $successAmount = $query->clone()
+        $successAmount = (clone $query)
             ->where('payment_status', 'success')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
             ->sum('orders.total_amount');
 
-        $pendingAmount = $query->clone()
+        $pendingAmount = (clone $query)
             ->where('payment_status', 'pending')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
             ->sum('orders.total_amount');
 
-        $failedAmount = $query->clone()
+        $failedAmount = (clone $query)
             ->where('payment_status', 'failed')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
             ->sum('orders.total_amount');
@@ -190,36 +175,31 @@ class PaymentController extends Controller
     }
 
     /**
-     * Download bukti pembayaran / e-ticket
+     * DOWNLOAD TICKET
      */
     public function downloadTicket(Request $request, $orderId)
     {
-        $user = $request->user();
-        $order = Order::with('event', 'orderItems')->findOrFail($orderId);
+        $order = Order::with('event', 'orderItems')
+            ->findOrFail($orderId);
 
-        // Validasi: order milik user yang login
-        if ($order->user_id != $user->id) {
-            return redirect()->back()->with('error', 'Tidak bisa mengakses ticket ini!');
+        if ($order->user_id != $request->user()->id) {
+            return back()->with('error', 'Tidak bisa akses ticket ini');
         }
 
-        // Check status
-        if ($order->status != 'paid') {
-            return redirect()->back()->with('error', 'Ticket belum tersedia!');
+        // ❗ hanya boleh kalau sudah CONFIRMED oleh organizer
+        if ($order->status !== 'confirmed') {
+            return back()->with('error', 'Ticket belum disetujui organizer');
         }
 
-        // Generate ticket info dari order items
-        $itemInfo = $order->orderItems->map(function ($item) {
-            return "{$item->ticketType->name} x{$item->quantity}";
+        $items = $order->orderItems->map(function ($item) {
+            return $item->ticketType->name . ' x' . $item->quantity;
         })->join(', ');
 
-        // Return JSON dengan info
         return response()->json([
-            'registration_code' => $order->payment_reference,
             'event_name' => $order->event->title,
-            'items' => $itemInfo,
-            'event_date' => $order->event->event_date->format('d M Y H:i'),
-            'location' => $order->event->location,
+            'items' => $items,
             'total_amount' => $order->total_amount,
+            'status' => $order->status,
         ]);
     }
 }

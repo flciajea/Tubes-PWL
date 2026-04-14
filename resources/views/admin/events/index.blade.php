@@ -219,9 +219,6 @@
         </div>
     </div>
 
-    <a href="/admin/events/{{ $event->id }}/ticket">
-        Kelola Tiket
-    </a>
     <div class="modal fade" id="modalView" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
