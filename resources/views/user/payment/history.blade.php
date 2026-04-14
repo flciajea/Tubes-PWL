@@ -1,784 +1,568 @@
 @extends('layouts.master')
 
 @section('content')
-    <style>
-        .hist-wrap {
-            padding: 1.5rem 0 3rem;
-        }
-
-        /* Breadcrumb */
-        .hist-breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .hist-breadcrumb a {
-            color: #888;
-            text-decoration: none;
-            transition: color .15s;
-        }
-
-        .hist-breadcrumb a:hover {
-            color: #111;
-        }
-
-        .hist-breadcrumb .sep {
-            font-size: 10px;
-            opacity: .5;
-        }
-
-        /* Page title */
-        .hist-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #111;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Alerts */
-        .hist-alert-success {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: .875rem 1rem;
-            background: #f0fdf4;
-            border: 1px solid #86efac;
-            border-radius: 10px;
-            margin-bottom: 1.25rem;
-        }
-
-        .hist-alert-success i {
-            color: #16a34a;
-            font-size: 14px;
-            margin-top: 1px;
-            flex-shrink: 0;
-        }
-
-        .hist-alert-success p {
-            font-size: 13px;
-            color: #15803d;
-            margin: 0;
-            line-height: 1.5;
-        }
-
-        /* Stat cards */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        @media (max-width: 800px) {
-            .stat-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stat-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-card {
-            background: #fff;
-            border: 1px solid #ebebeb;
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            color: #aaa;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .stat-label i {
-            font-size: 11px;
-        }
-
-        .stat-val {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111;
-            line-height: 1;
-        }
-
-        .stat-card.s-all .stat-label i {
-            color: #3b82f6;
-        }
-
-        .stat-card.s-all .stat-val {
-            color: #3b82f6;
-        }
-
-        .stat-card.s-ok .stat-label i {
-            color: #16a34a;
-        }
-
-        .stat-card.s-ok .stat-val {
-            color: #16a34a;
-        }
-
-        .stat-card.s-pend .stat-label i {
-            color: #d97706;
-        }
-
-        .stat-card.s-pend .stat-val {
-            color: #d97706;
-        }
-
-        .stat-card.s-fail .stat-label i {
-            color: #dc2626;
-        }
-
-        .stat-card.s-fail .stat-val {
-            color: #dc2626;
-        }
-
-        /* Filter bar */
-        .filter-bar {
-            background: #fff;
-            border: 1px solid #ebebeb;
-            border-radius: 12px;
-            padding: .875rem 1.25rem;
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-bar-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #aaa;
-            white-space: nowrap;
-        }
-
-        .filter-select {
-            height: 34px;
-            padding: 0 .75rem;
-            font-size: 13px;
-            border: 1px solid #e0e0e0;
-            border-radius: 7px;
-            background: #fafafa;
-            color: #111;
-            outline: none;
-            font-family: inherit;
-        }
-
-        .filter-select:focus {
-            border-color: #93c5fd;
-            background: #fff;
-        }
-
-        .filter-input {
-            height: 34px;
-            padding: 0 .75rem 0 2rem;
-            font-size: 13px;
-            border: 1px solid #e0e0e0;
-            border-radius: 7px;
-            background: #fafafa;
-            color: #111;
-            outline: none;
-            font-family: inherit;
-            min-width: 180px;
-        }
-
-        .filter-input:focus {
-            border-color: #93c5fd;
-            background: #fff;
-        }
-
-        .filter-search-wrap {
-            position: relative;
-        }
-
-        .filter-search-wrap i {
-            position: absolute;
-            left: .625rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 12px;
-            color: #bbb;
-            pointer-events: none;
-        }
-
-        /* Main card */
-        .hist-card {
-            background: #fff;
-            border: 1px solid #ebebeb;
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .hist-card-header {
-            padding: .875rem 1.25rem;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .hist-card-header h5 {
-            font-size: 14px;
-            font-weight: 600;
-            color: #111;
-            margin: 0;
-        }
-
-        .hist-card-header span {
-            font-size: 12px;
-            color: #aaa;
-        }
-
-        /* Table */
-        .hist-table-wrap {
-            overflow-x: auto;
-        }
-
-        .hist-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .hist-table thead tr {
-            background: #fafafa;
-        }
-
-        .hist-table th {
-            padding: .625rem 1rem;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            color: #aaa;
-            white-space: nowrap;
-            border-bottom: 1px solid #f0f0f0;
-            text-align: left;
-        }
-
-        .hist-table td {
-            padding: .875rem 1rem;
-            font-size: 13px;
-            color: #333;
-            border-bottom: 1px solid #f5f5f5;
-            vertical-align: middle;
-        }
-
-        .hist-table tbody tr:hover>td {
-            background: #fafafa;
-        }
-
-        .hist-table tbody tr:last-child>td {
-            border-bottom: none;
-        }
-
-        /* Event cell */
-        .ev-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #111;
-            margin-bottom: 2px;
-        }
-
-        .ev-ref {
-            font-size: 11px;
-            font-family: monospace;
-            color: #888;
-            letter-spacing: .3px;
-        }
-
-        /* Method badge */
-        .method-badge {
-            display: inline-block;
-            padding: 3px 9px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            background: #eff6ff;
-            color: #2563eb;
-        }
-
-        /* Status badges */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .status-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .sb-success {
-            background: #f0fdf4;
-            color: #15803d;
-        }
-
-        .sb-success::before {
-            background: #22c55e;
-        }
-
-        .sb-pending {
-            background: #fffbeb;
-            color: #b45309;
-        }
-
-        .sb-pending::before {
-            background: #f59e0b;
-        }
-
-        .sb-failed {
-            background: #fff5f5;
-            color: #b91c1c;
-        }
-
-        .sb-failed::before {
-            background: #ef4444;
-        }
-
-        /* Amount */
-        .amt {
-            font-size: 13px;
-            font-weight: 700;
-            color: #111;
-        }
-
-        /* Date */
-        .dt {
-            font-size: 12px;
-            color: #555;
-        }
-
-        .dt-none {
-            color: #ccc;
-        }
-
-        /* Toggle btn */
-        .toggle-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
-            border: 1px solid #e0e0e0;
-            background: #fafafa;
-            cursor: pointer;
-            color: #888;
-            font-size: 12px;
-            transition: background .15s, border-color .15s, transform .2s;
-        }
-
-        .toggle-btn:hover {
-            background: #f0f0f0;
-            border-color: #ccc;
-        }
-
-        .toggle-btn.open {
-            background: #f0f7ff;
-            border-color: #93c5fd;
-            color: #3b82f6;
-            transform: rotate(180deg);
-        }
-
-        /* Detail row */
-        .detail-row {
-            background: #fafafa;
-        }
-
-        .detail-row td {
-            padding: 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .detail-inner {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 0;
-        }
-
-        @media (max-width: 600px) {
-            .detail-inner {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .detail-col {
-            padding: 1rem 1.25rem;
-            border-right: 1px solid #f0f0f0;
-        }
-
-        .detail-col:last-child {
-            border-right: none;
-        }
-
-        .detail-col-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            color: #aaa;
-            margin-bottom: .75rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .detail-col-title i {
-            font-size: 11px;
-        }
-
-        .detail-field {
-            margin-bottom: .625rem;
-        }
-
-        .detail-field:last-child {
-            margin-bottom: 0;
-        }
-
-        .detail-field-label {
-            font-size: 11px;
-            color: #bbb;
-            margin-bottom: 2px;
-        }
-
-        .detail-field-val {
-            font-size: 13px;
-            font-weight: 600;
-            color: #111;
-        }
-
-        .detail-field-code {
-            font-size: 12px;
-            font-family: monospace;
-            color: #3b82f6;
-            background: #eff6ff;
-            padding: 2px 7px;
-            border-radius: 5px;
-            display: inline-block;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-        }
-
-        .empty-state-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            background: #f4f4f4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-        }
-
-        .empty-state-icon i {
-            font-size: 22px;
-            color: #ccc;
-        }
-
-        .empty-state p {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 1rem;
-        }
-
-        .btn-find {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: .5rem 1.125rem;
-            background: #111;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: opacity .15s;
-        }
-
-        .btn-find:hover {
-            opacity: .85;
-            color: #fff;
-            text-decoration: none;
-        }
-
-        /* Pagination */
-        .hist-footer {
-            padding: .875rem 1.25rem;
-            border-top: 1px solid #f0f0f0;
-        }
-    </style>
-
-    <div class="hist-wrap">
-        <div class="page-inner">
-
-            <!-- Breadcrumb -->
-            <div class="hist-breadcrumb">
-                <a href="{{ route('user.dashboard') }}"><i class="fas fa-home"></i></a>
-                <span class="sep">›</span>
-                <span>Riwayat Pembayaran</span>
-            </div>
-
-            <div class="hist-title">Riwayat Pembayaran</div>
-
-            <!-- Success alert -->
-            @if (session('success'))
-                <div class="hist-alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    <p>{{ session('success') }}</p>
-                </div>
-            @endif
-
-            <!-- Stat cards -->
-            <div class="stat-grid">
-                <div class="stat-card s-all">
-                    <div class="stat-label"><i class="fas fa-layer-group"></i> Total Pembayaran</div>
-                    <div class="stat-val">Rp {{ number_format($totalAmount, 0, ',', '.') }}</div>
-                </div>
-                <div class="stat-card s-ok">
-                    <div class="stat-label"><i class="fas fa-check-circle"></i> Berhasil</div>
-                    <div class="stat-val">Rp {{ number_format($successAmount, 0, ',', '.') }}</div>
-                </div>
-                <div class="stat-card s-pend">
-                    <div class="stat-label"><i class="fas fa-clock"></i> Menunggu Verifikasi</div>
-                    <div class="stat-val">Rp {{ number_format($pendingAmount, 0, ',', '.') }}</div>
-                </div>
-                <div class="stat-card s-fail">
-                    <div class="stat-label"><i class="fas fa-times-circle"></i> Gagal</div>
-                    <div class="stat-val">Rp {{ number_format($failedAmount, 0, ',', '.') }}</div>
-                </div>
-            </div>
-
-            <!-- Filter bar -->
-            <div class="filter-bar">
-                <span class="filter-bar-label">Filter:</span>
-                <select class="filter-select" id="filterStatus">
-                    <option value="">Semua Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="success">Berhasil</option>
-                    <option value="failed">Gagal</option>
-                    <option value="cancelled">Dibatalkan</option>
-                </select>
-                <div class="filter-search-wrap">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="filter-input" placeholder="Cari Event..." id="filterEvent">
-                </div>
-            </div>
-
-            <!-- Table card -->
-            <div class="hist-card">
-                <div class="hist-card-header">
-                    <h5><i class="fas fa-receipt" style="margin-right:6px;color:#aaa"></i>Daftar Pembayaran</h5>
-                    <span>{{ $payments->total() }} transaksi</span>
-                </div>
-
-                <div class="hist-table-wrap">
-                    <table class="hist-table">
-                        <thead>
-                            <tr>
-                                <th style="width:44px">No</th>
-                                <th>Event</th>
-                                <th>Metode</th>
-                                <th>Jumlah</th>
-                                <th>Status</th>
-                                <th>Tanggal</th>
-                                <th style="width:48px"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($payments as $payment)
-                                <tr class="main-row" data-payment="{{ $payment->id }}">
-                                    <td style="color:#bbb;font-size:12px">
-                                        {{ ($payments->currentPage() - 1) * $payments->perPage() + $loop->iteration }}
-                                    </td>
-                                    <td>
-                                        <div class="ev-name">
-                                            {{ Str::limit($payment->order->event->title ?? 'Event Tidak Ditemukan', 25) }}</div>
-                                        <div class="ev-ref">
-                                            {{ $payment->order->payment_reference ?? 'Order #' . $payment->order->id }}</div>
-                                        @if($payment->order?->registration_code)
-                                            <div class="ev-ref">{{ $payment->order->registration_code }}</div>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <span class="method-badge">
-                                            {{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="amt">Rp
-                                            {{ number_format($payment->order->total_amount, 0, ',', '.') }}</span>
-                                    </td>
-                                    <td>
-                                        @if($payment->order->status == 'pending')
-                                            <span class="badge bg-warning">Pending</span>
-                                        @elseif($payment->order->status == 'paid')
-                                            <span class="badge bg-success">Paid</span>
-                                        @else
-                                            <span class="badge bg-danger">Failed</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($payment->paid_at)
-                                            <span
-                                                class="dt">{{ $payment->paid_at->format('d M Y') }}<br>{{ $payment->paid_at->format('H:i') }}</span>
-                                        @else
-                                            <span class="dt-none">—</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="toggle-btn toggleDetails" data-payment-id="{{ $payment->id }}"
-                                            title="Lihat detail">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Detail row -->
-                                <tr class="detail-row detail-row-{{ $payment->id }} d-none">
-                                    <td colspan="7">
-                                        <div class="detail-inner">
-                                            <div class="detail-col">
-                                                <div class="detail-col-title"><i class="fas fa-clipboard-list"></i> Informasi
-                                                    Registrasi</div>
-                                                <div class="detail-field">
-                                                    <div class="detail-field-label">Tanggal Registrasi</div>
-                                                    <div class="detail-field-val">
-                                                        {{ $payment->order->created_at->format('d M Y, H:i') }}</div>
-                                                </div>
-                                                <div class="detail-field">
-                                                    <div class="detail-field-label">Tipe Tiket</div>
-                                                    @foreach ($payment->order->orderItems as $item)
-                                                        <div class="detail-field-val">{{ $item->ticketType->name }}
-                                                            &times;{{ $item->quantity }}</div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                            <div class="detail-col">
-                                                <div class="detail-col-title"><i class="fas fa-credit-card"></i> Informasi
-                                                    Pembayaran</div>
-                                                <div class="detail-field">
-                                                    <div class="detail-field-label">ID Transaksi</div>
-                                                    <span class="detail-field-code">{{ $payment->transaction_id }}</span>
-                                                </div>
-                                                <div class="detail-field">
-                                                    <div class="detail-field-label">Metode</div>
-                                                    <div class="detail-field-val">
-                                                        {{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="detail-col">
-                                                <div class="detail-col-title"><i class="fas fa-calendar-alt"></i> Detail Event
-                                                </div>
-                                                <div class="detail-field">
-                                                    <div class="detail-field-label">Tanggal Event</div>
-                                                    <div class="detail-field-val">
-                                                        {{ $payment->order->event->event_date->format('d M Y, H:i') }}</div>
-                                                </div>
-                                                <div class="detail-field">
-                                                    <div class="detail-field-label">Lokasi</div>
-                                                    <div class="detail-field-val">
-                                                        {{ Str::limit($payment->order->event->location, 30) }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon"><i class="fas fa-receipt"></i></div>
-                                            <p>Belum ada riwayat pembayaran</p>
-                                            <a href="{{ route('user.events.index') }}" class="btn-find">
-                                                <i class="fas fa-search"></i> Cari Event
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                @if ($payments->count() > 0)
-                    <div class="hist-footer">
-                        {{ $payments->links() }}
-                    </div>
-                @endif
-            </div>
-
-        </div>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #ffffff;
+    --surface: #FFFFFF;
+    --surface-2: #F9F8F5;
+    --border: rgba(0,0,0,0.07);
+    --text-primary: #1A1917;
+    --text-secondary: #6B6860;
+    --text-muted: #A8A49E;
+    --blue: #2E7DD1;
+    --blue-bg: #E4EFF9;
+    --blue-text: #1145A0;
+    --green: #1D9E75;
+    --green-bg: #E3F5EE;
+    --green-text: #0A5E41;
+    --amber: #C98A10;
+    --amber-bg: #FEF3DC;
+    --amber-text: #7A4F00;
+    --red: #D94040;
+    --red-bg: #FDECEC;
+    --red-text: #8A1818;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  .ph-wrap {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    padding: 28px 32px 56px;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text-primary);
+  }
+
+  /* ─── Header ─── */
+  .ph-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .ph-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin: 0 0 4px; }
+  .ph-header p  { font-size: 13px; color: var(--text-muted); margin: 0; }
+  .ph-back {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: var(--text-secondary);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 99px; text-decoration: none;
+    transition: background .15s, color .15s;
+  }
+  .ph-back:hover { background: #EEECEA; color: var(--text-primary); text-decoration: none; }
+
+  /* ─── Alert ─── */
+  .ph-alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    border-radius: var(--radius-sm); padding: 13px 16px;
+    margin-bottom: 18px; font-size: 13.5px; font-weight: 500;
+  }
+  .ph-alert.success { background: var(--green-bg); color: var(--green-text); border: 1px solid rgba(29,158,117,.2); }
+  .ph-alert-close {
+    margin-left: auto; background: none; border: none;
+    cursor: pointer; opacity: .5; padding: 0; line-height: 1; flex-shrink: 0;
+  }
+  .ph-alert-close:hover { opacity: 1; }
+
+  /* ─── Stat Grid ─── */
+  .ph-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 900px) { .ph-stats { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .ph-stats { grid-template-columns: 1fr; } }
+
+  .ph-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .ph-stat:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .ph-stat::after {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 3px 0 0 3px;
+  }
+  .ph-stat.s-all::after  { background: var(--blue); }
+  .ph-stat.s-ok::after   { background: var(--green); }
+  .ph-stat.s-pend::after { background: var(--amber); }
+  .ph-stat.s-fail::after { background: var(--red); }
+
+  .ph-stat-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .07em; margin-bottom: 8px;
+  }
+  .ph-stat.s-all  .ph-stat-label { color: var(--blue-text); }
+  .ph-stat.s-ok   .ph-stat-label { color: var(--green-text); }
+  .ph-stat.s-pend .ph-stat-label { color: var(--amber-text); }
+  .ph-stat.s-fail .ph-stat-label { color: var(--red-text); }
+
+  .ph-stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px; font-weight: 700; letter-spacing: -.3px; line-height: 1;
+  }
+  .ph-stat.s-all  .ph-stat-val { color: var(--blue-text); }
+  .ph-stat.s-ok   .ph-stat-val { color: var(--green-text); }
+  .ph-stat.s-pend .ph-stat-val { color: var(--amber-text); }
+  .ph-stat.s-fail .ph-stat-val { color: var(--red-text); }
+
+  /* ─── Filter Bar ─── */
+  .ph-filter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .ph-filter-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--text-muted); white-space: nowrap;
+  }
+  .ph-filter-select, .ph-filter-input {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 13px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; color: var(--text-primary); outline: none;
+    transition: border-color .15s, background .15s;
+    appearance: none; -webkit-appearance: none;
+  }
+  .ph-filter-select:focus, .ph-filter-input:focus {
+    border-color: #1A1917; background: #fff;
+    box-shadow: 0 0 0 3px rgba(26,25,23,.07);
+  }
+  .ph-filter-select { padding-right: 30px; }
+  .ph-filter-select-wrap { position: relative; }
+  .ph-filter-select-wrap::after {
+    content: ''; position: absolute; right: 11px; top: 50%;
+    transform: translateY(-50%); width: 0; height: 0;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 4px solid var(--text-muted); pointer-events: none;
+  }
+  .ph-filter-search-wrap { position: relative; }
+  .ph-filter-search-wrap svg {
+    position: absolute; left: 11px; top: 50%;
+    transform: translateY(-50%); pointer-events: none;
+  }
+  .ph-filter-input { padding-left: 34px; min-width: 200px; }
+  .ph-filter-input::placeholder { color: var(--text-muted); }
+
+  /* ─── Main Card ─── */
+  .ph-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .ph-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .ph-card-head-left { display: flex; align-items: center; gap: 10px; }
+  .ph-card-icon {
+    width: 32px; height: 32px; border-radius: 8px; background: #EEECEA;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ph-card-title { font-size: 14px; font-weight: 700; letter-spacing: -.1px; margin: 0; }
+  .ph-count-chip {
+    background: #EEECEA; border: 1px solid var(--border);
+    font-size: 12px; color: var(--text-secondary); font-weight: 600;
+    padding: 3px 11px; border-radius: 99px; font-family: 'DM Mono', monospace;
+  }
+
+  /* ─── Table ─── */
+  .ph-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .ph-table thead th {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--text-muted);
+    padding: 11px 18px; border-bottom: 1px solid var(--border);
+    white-space: nowrap; background: var(--surface);
+  }
+  .ph-table tbody .main-row { transition: background .12s; }
+  .ph-table tbody .main-row:hover td { background: var(--surface-2); }
+  .ph-table tbody td {
+    padding: 13px 18px; font-size: 13.5px;
+    border-bottom: 1px solid var(--border); vertical-align: middle;
+  }
+  .ph-table tbody .main-row:last-of-type td { border-bottom: none; }
+
+  .td-no { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); width: 44px; }
+  .td-ev-name { font-weight: 600; font-size: 13.5px; margin: 0 0 2px; }
+  .td-ev-ref  { font-size: 11.5px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .td-method {
+    display: inline-block; padding: 3px 10px; border-radius: 6px;
+    font-size: 11.5px; font-weight: 600;
+    background: var(--blue-bg); color: var(--blue-text);
+  }
+  .td-amt { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .td-date { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .td-date-none { color: #D0CCC5; font-family: 'DM Mono', monospace; font-size: 13px; }
+
+  /* Status Badges */
+  .s-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; font-weight: 600; padding: 4px 11px;
+    border-radius: 99px; white-space: nowrap;
+  }
+  .s-badge::before {
+    content: ''; width: 5px; height: 5px;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  .s-paid     { background: var(--green-bg); color: var(--green-text); }
+  .s-paid::before   { background: var(--green); }
+  .s-pending  { background: var(--amber-bg); color: var(--amber-text); }
+  .s-pending::before { background: var(--amber); animation: blink 1.6s ease infinite; }
+  .s-failed   { background: var(--red-bg);   color: var(--red-text); }
+  .s-failed::before { background: var(--red); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+  /* Toggle Btn */
+  .toggle-btn {
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); cursor: pointer; color: var(--text-muted);
+    transition: background .15s, border-color .15s;
+  }
+  .toggle-btn:hover { background: #EEECEA; border-color: rgba(0,0,0,.12); color: var(--text-primary); }
+  .toggle-btn svg { transition: transform .22s; }
+  .toggle-btn.open { background: var(--blue-bg); border-color: rgba(46,125,209,.3); color: var(--blue); }
+  .toggle-btn.open svg { transform: rotate(180deg); }
+
+  /* Detail Row */
+  .detail-row td { padding: 0 !important; border-bottom: 1px solid var(--border) !important; }
+  .detail-inner {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    background: var(--surface-2);
+  }
+  @media (max-width: 640px) { .detail-inner { grid-template-columns: 1fr; } }
+
+  .detail-col { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .detail-col:last-child { border-right: none; }
+  .detail-col-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--text-muted);
+    margin-bottom: 14px; display: flex; align-items: center; gap: 7px;
+  }
+  .detail-col-title-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-muted); flex-shrink: 0;
+  }
+  .detail-field { margin-bottom: 10px; }
+  .detail-field:last-child { margin-bottom: 0; }
+  .detail-field-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .detail-field-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .detail-field-code {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--blue-text); background: var(--blue-bg);
+    padding: 2px 8px; border-radius: 5px; display: inline-block;
+  }
+
+  /* Empty */
+  .ph-empty { text-align: center; padding: 60px 24px; }
+  .ph-empty-icon {
+    width: 52px; height: 52px; background: #EEECEA; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+  }
+  .ph-empty h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px; letter-spacing: -.2px; }
+  .ph-empty p  { font-size: 13px; color: var(--text-muted); margin: 0 0 18px; }
+  .ph-empty-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--text-primary); color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 600; padding: 9px 20px;
+    border-radius: 99px; text-decoration: none; transition: opacity .15s;
+  }
+  .ph-empty-btn:hover { opacity: .82; color: #fff; text-decoration: none; }
+
+  /* Pagination */
+  .ph-pagination {
+    padding: 16px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end;
+  }
+  .ph-pagination nav .flex { gap: 4px; }
+  .ph-pagination nav span[aria-current="page"] > span,
+  .ph-pagination nav a {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600;
+    border-radius: 8px !important; border: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important; padding: 6px 12px !important;
+    line-height: 1.4 !important; background: var(--surface) !important;
+  }
+  .ph-pagination nav span[aria-current="page"] > span {
+    background: var(--text-primary) !important;
+    color: #fff !important; border-color: var(--text-primary) !important;
+  }
+  .ph-pagination nav a:hover { background: #EEECEA !important; color: var(--text-primary) !important; }
+</style>
+
+<div class="ph-wrap">
+  <div class="page-inner">
+
+    {{-- Header --}}
+    <div class="ph-header">
+      <div>
+        <h1>Riwayat Pembayaran</h1>
+        <p>Semua transaksi dan status pembayaran Anda</p>
+      </div>
+      <a href="{{ route('user.dashboard') }}" class="ph-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Dashboard
+      </a>
     </div>
+
+    {{-- Alert --}}
+    @if (session('success'))
+      <div class="ph-alert success">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ session('success') }}
+        <button class="ph-alert-close" onclick="this.closest('.ph-alert').remove()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    @endif
+
+    {{-- Stats --}}
+    <div class="ph-stats">
+      <div class="ph-stat s-all">
+        <div class="ph-stat-label">Total Pembayaran</div>
+        <div class="ph-stat-val">Rp {{ number_format($totalAmount, 0, ',', '.') }}</div>
+      </div>
+      <div class="ph-stat s-ok">
+        <div class="ph-stat-label">Berhasil</div>
+        <div class="ph-stat-val">Rp {{ number_format($successAmount, 0, ',', '.') }}</div>
+      </div>
+      <div class="ph-stat s-pend">
+        <div class="ph-stat-label">Menunggu Verifikasi</div>
+        <div class="ph-stat-val">Rp {{ number_format($pendingAmount, 0, ',', '.') }}</div>
+      </div>
+      <div class="ph-stat s-fail">
+        <div class="ph-stat-label">Gagal</div>
+        <div class="ph-stat-val">Rp {{ number_format($failedAmount, 0, ',', '.') }}</div>
+      </div>
+    </div>
+
+    {{-- Filter --}}
+    <div class="ph-filter">
+      <span class="ph-filter-label">Filter</span>
+      <div class="ph-filter-select-wrap">
+        <select class="ph-filter-select" id="filterStatus">
+          <option value="">Semua Status</option>
+          <option value="pending">Pending</option>
+          <option value="success">Berhasil</option>
+          <option value="failed">Gagal</option>
+          <option value="cancelled">Dibatalkan</option>
+        </select>
+      </div>
+      <div class="ph-filter-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8A49E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="ph-filter-input" placeholder="Cari event..." id="filterEvent">
+      </div>
+    </div>
+
+    {{-- Table Card --}}
+    <div class="ph-card">
+      <div class="ph-card-head">
+        <div class="ph-card-head-left">
+          <div class="ph-card-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A1917" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <p class="ph-card-title">Daftar Pembayaran</p>
+        </div>
+        <span class="ph-count-chip">{{ $payments->total() }} transaksi</span>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="ph-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Event</th>
+              <th>Metode</th>
+              <th>Jumlah</th>
+              <th>Status</th>
+              <th>Tanggal Bayar</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse ($payments as $payment)
+              <tr class="main-row" data-payment="{{ $payment->id }}">
+                <td class="td-no">{{ str_pad(($payments->currentPage() - 1) * $payments->perPage() + $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                <td>
+                  <p class="td-ev-name">{{ Str::limit($payment->order->event->title ?? 'Event Tidak Ditemukan', 28) }}</p>
+                  <span class="td-ev-ref">{{ $payment->order->payment_reference ?? 'Order #' . $payment->order->id }}</span>
+                  @if($payment->order?->registration_code)
+                    <br><span class="td-ev-ref">{{ $payment->order->registration_code }}</span>
+                  @endif
+                </td>
+                <td>
+                  <span class="td-method">{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</span>
+                </td>
+                <td class="td-amt">Rp {{ number_format($payment->order->total_amount, 0, ',', '.') }}</td>
+                <td>
+                  @if($payment->order->status == 'pending')
+                    <span class="s-badge s-pending">Pending</span>
+                  @elseif($payment->order->status == 'paid')
+                    <span class="s-badge s-paid">Paid</span>
+                  @else
+                    <span class="s-badge s-failed">Failed</span>
+                  @endif
+                </td>
+                <td>
+                  @if ($payment->paid_at)
+                    <span class="td-date">{{ $payment->paid_at->format('d M Y') }}<br>{{ $payment->paid_at->format('H:i') }}</span>
+                  @else
+                    <span class="td-date-none">—</span>
+                  @endif
+                </td>
+                <td>
+                  <button class="toggle-btn toggleDetails" data-payment-id="{{ $payment->id }}" title="Lihat detail">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                </td>
+              </tr>
+
+              {{-- Detail Row --}}
+              <tr class="detail-row detail-row-{{ $payment->id }} d-none">
+                <td colspan="7">
+                  <div class="detail-inner">
+                    <div class="detail-col">
+                      <div class="detail-col-title">
+                        <span class="detail-col-title-dot"></span>
+                        Informasi Registrasi
+                      </div>
+                      <div class="detail-field">
+                        <div class="detail-field-label">Tanggal Registrasi</div>
+                        <div class="detail-field-val">{{ $payment->order->created_at->format('d M Y, H:i') }}</div>
+                      </div>
+                      <div class="detail-field">
+                        <div class="detail-field-label">Tipe Tiket</div>
+                        @foreach ($payment->order->orderItems as $item)
+                          <div class="detail-field-val">{{ $item->ticketType->name }} &times;{{ $item->quantity }}</div>
+                        @endforeach
+                      </div>
+                    </div>
+                    <div class="detail-col">
+                      <div class="detail-col-title">
+                        <span class="detail-col-title-dot"></span>
+                        Informasi Pembayaran
+                      </div>
+                      <div class="detail-field">
+                        <div class="detail-field-label">ID Transaksi</div>
+                        <span class="detail-field-code">{{ $payment->transaction_id }}</span>
+                      </div>
+                      <div class="detail-field">
+                        <div class="detail-field-label">Metode</div>
+                        <div class="detail-field-val">{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</div>
+                      </div>
+                    </div>
+                    <div class="detail-col">
+                      <div class="detail-col-title">
+                        <span class="detail-col-title-dot"></span>
+                        Detail Event
+                      </div>
+                      <div class="detail-field">
+                        <div class="detail-field-label">Tanggal Event</div>
+                        <div class="detail-field-val">{{ $payment->order->event->event_date->format('d M Y, H:i') }}</div>
+                      </div>
+                      <div class="detail-field">
+                        <div class="detail-field-label">Lokasi</div>
+                        <div class="detail-field-val">{{ Str::limit($payment->order->event->location, 30) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+            @empty
+              <tr>
+                <td colspan="7">
+                  <div class="ph-empty">
+                    <div class="ph-empty-icon">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A49E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <h3>Belum ada riwayat pembayaran</h3>
+                    <p>Daftar ke event untuk memulai transaksi</p>
+                    <a href="{{ route('user.events.index') }}" class="ph-empty-btn">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      Cari Event
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+
+      @if ($payments->count() > 0)
+        <div class="ph-pagination">
+          {{ $payments->links() }}
+        </div>
+      @endif
+
+    </div>
+
+  </div>
+</div>
+
 @endsection
 
 @section('ExtraJS')
-    <script>
-        // Toggle detail row
-        document.querySelectorAll('.toggleDetails').forEach(function (button) {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-                var paymentId = this.getAttribute('data-payment-id');
-                var detailRow = document.querySelector('.detail-row-' + paymentId);
-                if (detailRow) {
-                    detailRow.classList.toggle('d-none');
-                    this.classList.toggle('open');
-                }
-            });
-        });
+<script>
+  // Toggle detail row
+  document.querySelectorAll('.toggleDetails').forEach(function(button) {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      var paymentId = this.getAttribute('data-payment-id');
+      var detailRow = document.querySelector('.detail-row-' + paymentId);
+      if (detailRow) {
+        detailRow.classList.toggle('d-none');
+        this.classList.toggle('open');
+      }
+    });
+  });
 
-        // Filter by status
-        document.getElementById('filterStatus').addEventListener('change', function () {
-            var status = this.value.toLowerCase();
-            document.querySelectorAll('tbody .main-row').forEach(function (row) {
-                var statusCell = row.querySelector('td:nth-child(5)');
-                var payId = row.getAttribute('data-payment');
-                var detailRow = document.querySelector('.detail-row-' + payId);
-                var show = status === '' || statusCell.textContent.toLowerCase().includes(status);
-                row.style.display = show ? 'table-row' : 'none';
-                if (detailRow) detailRow.style.display = show ? '' : 'none';
-            });
-        });
+  // Filter by status
+  document.getElementById('filterStatus').addEventListener('change', function() {
+    var status = this.value.toLowerCase();
+    document.querySelectorAll('tbody .main-row').forEach(function(row) {
+      var statusCell = row.querySelector('td:nth-child(5)');
+      var payId = row.getAttribute('data-payment');
+      var detailRow = document.querySelector('.detail-row-' + payId);
+      var show = status === '' || statusCell.textContent.toLowerCase().includes(status);
+      row.style.display = show ? 'table-row' : 'none';
+      if (detailRow) detailRow.style.display = show ? '' : 'none';
+    });
+  });
 
-        // Filter by event name
-        document.getElementById('filterEvent').addEventListener('keyup', function () {
-            var search = this.value.toLowerCase();
-            document.querySelectorAll('tbody .main-row').forEach(function (row) {
-                var eventCell = row.querySelector('td:nth-child(2)');
-                var payId = row.getAttribute('data-payment');
-                var detailRow = document.querySelector('.detail-row-' + payId);
-                var show = eventCell.textContent.toLowerCase().includes(search);
-                row.style.display = show ? 'table-row' : 'none';
-                if (detailRow) detailRow.style.display = show ? '' : 'none';
-            });
-        });
-    </script>
+  // Filter by event name
+  document.getElementById('filterEvent').addEventListener('keyup', function() {
+    var search = this.value.toLowerCase();
+    document.querySelectorAll('tbody .main-row').forEach(function(row) {
+      var eventCell = row.querySelector('td:nth-child(2)');
+      var payId = row.getAttribute('data-payment');
+      var detailRow = document.querySelector('.detail-row-' + payId);
+      var show = eventCell.textContent.toLowerCase().includes(search);
+      row.style.display = show ? 'table-row' : 'none';
+      if (detailRow) detailRow.style.display = show ? '' : 'none';
+    });
+  });
+</script>
 @endsection

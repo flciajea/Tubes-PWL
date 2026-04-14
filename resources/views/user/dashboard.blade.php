@@ -284,7 +284,7 @@
   .ud-empty-btn:hover { opacity: .82; color: #fff; text-decoration: none; }
 </style>
 
-<div class="ud-wrap">7
+<div class="ud-wrap">
 
   {{-- Welcome Banner --}}
   <div class="ud-welcome">
