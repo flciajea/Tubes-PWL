@@ -39,7 +39,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark">{{ $order->orderItems->first()->ticketType->event->name ?? 'N/A' }}</div>
+                                <div class="fw-bold text-dark">{{ $order->orderItems->first()->ticketType->event->title ?? 'N/A' }}</div>
                                 <div class="text-muted small"><i class="bi bi-tag-fill me-1"></i>{{ $order->orderItems->first()->ticketType->name ?? '-' }}</div>
                             </td>
                             <td class="text-center">
